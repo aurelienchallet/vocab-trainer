@@ -299,6 +299,9 @@ if page == "Home":
 elif page == "Training":
     st.title("Training Mode")
 
+    # -------------------------
+    # FILTRES
+    # -------------------------
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -316,6 +319,9 @@ elif page == "Training":
         horizontal=True
     )
 
+    # -------------------------
+    # FILTRAGE
+    # -------------------------
     filtered = filter_vocab(vocab, level, word_type, family)
 
     search = st.text_input("Search")
@@ -333,14 +339,18 @@ elif page == "Training":
         st.warning("No words found.")
         st.stop()
 
-    # Initialisation carte
+    # -------------------------
+    # SESSION STATE
+    # -------------------------
     if "training_word" not in st.session_state:
         st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
 
     if "card_flipped" not in st.session_state:
         st.session_state.card_flipped = False
 
-    # Nouvelle carte
+    # -------------------------
+    # NEW CARD
+    # -------------------------
     if st.button("New flashcard"):
         st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
         st.session_state.card_flipped = False
@@ -355,83 +365,49 @@ elif page == "Training":
         front = word["translation_fr"]
         back = word["english"]
 
-    # Flip bouton
-    if st.button("Flip card"):
-        st.session_state.card_flipped = not st.session_state.card_flipped
+    display_text = back if st.session_state.card_flipped else front
 
-    flipped_class = "flipped" if st.session_state.card_flipped else ""
+    # -------------------------
+    # STYLE CARTE
+    # -------------------------
+    bg_color = "#1e3a8a" if st.session_state.card_flipped else "white"
+    text_color = "white" if st.session_state.card_flipped else "black"
 
-    # Carte centrée + largeur réduite
     st.markdown(f"""
     <style>
-    .card-container {{
-        display: flex;
-        justify-content: center;
-        margin-top: 30px;
-    }}
-
-    .flip-card {{
-        background-color: transparent;
-        width: 400px;
+    div.stButton > button {{
+        width: 420px;
         height: 220px;
-        perspective: 1000px;
-    }}
-
-    .flip-card-inner {{
-        position: relative;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-        transition: transform 0.6s;
-        transform-style: preserve-3d;
-    }}
-
-    .flip-card.flipped .flip-card-inner {{
-        transform: rotateY(180deg);
-    }}
-
-    .flip-card-front, .flip-card-back {{
-        position: absolute;
-        width: 100%;
-        height: 100%;
         border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        backface-visibility: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        padding: 20px;
-    }}
-
-    .flip-card-front {{
-        background: white;
         font-size: 32px;
         font-weight: bold;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        background-color: {bg_color};
+        color: {text_color};
+        transition: all 0.2s ease;
     }}
 
-    .flip-card-back {{
-        background: #1e3a8a;
-        color: white;
-        transform: rotateY(180deg);
-        font-size: 26px;
+    div.stButton > button:hover {{
+        transform: scale(1.02);
     }}
     </style>
-
-    <div class="card-container">
-        <div class="flip-card {flipped_class}">
-            <div class="flip-card-inner">
-                <div class="flip-card-front">
-                    {front}
-                </div>
-                <div class="flip-card-back">
-                    {back}
-                </div>
-            </div>
-        </div>
-    </div>
     """, unsafe_allow_html=True)
 
-    # Next card
+    # -------------------------
+    # CARTE CLIQUABLE
+    # -------------------------
+    col_left, col_center, col_right = st.columns([1,2,1])
+
+    with col_center:
+        if st.button(display_text):
+            st.session_state.card_flipped = not st.session_state.card_flipped
+            st.rerun()
+
+    # -------------------------
+    # NEXT CARD
+    # -------------------------
+    st.write("")
     if st.button("Next card"):
         st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
         st.session_state.card_flipped = False
