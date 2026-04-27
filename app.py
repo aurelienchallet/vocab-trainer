@@ -294,6 +294,10 @@ if page == "Home":
 # TRAINING
 # =========================
 
+# =========================
+# TRAINING
+# =========================
+
 elif page == "Training":
     st.title("Training Mode")
 
@@ -334,10 +338,6 @@ elif page == "Training":
     if "training_word" not in st.session_state:
         st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
 
-    if st.button("New flashcard"):
-        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
-        st.rerun()
-
     word = st.session_state.training_word
 
     if direction == "English → French":
@@ -348,17 +348,76 @@ elif page == "Training":
         back = word["english"]
 
     st.markdown(f"""
-    <div class="word-card">
-        <div class="word">{front}</div>
-        <br>
-        <span class="badge">{word["part_of_speech"]}</span>
-        <span class="badge">{word["level"]}</span>
-        <span class="badge">{word["family"]}</span>
+    <style>
+    .flip-card {{
+      background-color: transparent;
+      width: 100%;
+      height: 240px;
+      perspective: 1000px;
+      margin-top: 25px;
+      margin-bottom: 25px;
+    }}
+
+    .flip-card-inner {{
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }}
+
+    .flip-card:hover .flip-card-inner {{
+      transform: rotateY(180deg);
+    }}
+
+    .flip-card-front, .flip-card-back {{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      padding: 30px;
+    }}
+
+    .flip-card-front {{
+      background: white;
+      font-size: 42px;
+      font-weight: 700;
+      color: #0f172a;
+    }}
+
+    .flip-card-back {{
+      background: #1e3a8a;
+      color: white;
+      transform: rotateY(180deg);
+      font-size: 32px;
+      font-weight: 600;
+    }}
+    </style>
+
+    <div class="flip-card">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          {front}
+        </div>
+        <div class="flip-card-back">
+          {back}
+        </div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("Show answer"):
-        st.success(back)
+    col_a, col_b, col_c = st.columns([1, 1, 1])
+
+    with col_b:
+        if st.button("Next card"):
+            st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
+            st.rerun()
 
     st.subheader("Filtered vocabulary")
     st.dataframe(
