@@ -290,9 +290,7 @@ if page == "Home":
 
 
 
-# =========================
-# TRAINING
-# =========================
+
 
 # =========================
 # TRAINING
@@ -304,13 +302,13 @@ elif page == "Training":
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        level = st.selectbox("Level", ["All"] + sorted(vocab["level"].unique()))
+        level = st.selectbox("Level", ["All"] + sorted(vocab["level"].dropna().unique()))
 
     with col2:
-        word_type = st.selectbox("Type", ["All"] + sorted(vocab["part_of_speech"].unique()))
+        word_type = st.selectbox("Type", ["All"] + sorted(vocab["part_of_speech"].dropna().unique()))
 
     with col3:
-        family = st.selectbox("Family", ["All"] + sorted(vocab["family"].unique()))
+        family = st.selectbox("Family", ["All"] + sorted(vocab["family"].dropna().unique()))
 
     direction = st.radio(
         "Direction",
@@ -325,8 +323,8 @@ elif page == "Training":
     if search:
         s = search.lower()
         filtered = filtered[
-            filtered["english"].str.lower().str.contains(s)
-            | filtered["translation_fr"].str.lower().str.contains(s)
+            filtered["english"].str.lower().str.contains(s, na=False)
+            | filtered["translation_fr"].str.lower().str.contains(s, na=False)
         ]
 
     st.write(f"Results: **{len(filtered)}**")
@@ -335,8 +333,18 @@ elif page == "Training":
         st.warning("No words found.")
         st.stop()
 
+    # Initialisation carte
     if "training_word" not in st.session_state:
         st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
+
+    if "card_flipped" not in st.session_state:
+        st.session_state.card_flipped = False
+
+    # Nouvelle carte
+    if st.button("New flashcard"):
+        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
+        st.session_state.card_flipped = False
+        st.rerun()
 
     word = st.session_state.training_word
 
@@ -347,85 +355,87 @@ elif page == "Training":
         front = word["translation_fr"]
         back = word["english"]
 
+    # Flip bouton
+    if st.button("Flip card"):
+        st.session_state.card_flipped = not st.session_state.card_flipped
+
+    flipped_class = "flipped" if st.session_state.card_flipped else ""
+
+    # Carte centrée + largeur réduite
     st.markdown(f"""
     <style>
+    .card-container {{
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }}
+
     .flip-card {{
-      background-color: transparent;
-      width: 100%;
-      height: 240px;
-      perspective: 1000px;
-      margin-top: 25px;
-      margin-bottom: 25px;
+        background-color: transparent;
+        width: 400px;
+        height: 220px;
+        perspective: 1000px;
     }}
 
     .flip-card-inner {{
-      position: relative;
-      width: 100%;
-      height: 100%;
-      text-align: center;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
     }}
 
-    .flip-card:hover .flip-card-inner {{
-      transform: rotateY(180deg);
+    .flip-card.flipped .flip-card-inner {{
+        transform: rotateY(180deg);
     }}
 
     .flip-card-front, .flip-card-back {{
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backface-visibility: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-      padding: 30px;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backface-visibility: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 20px;
     }}
 
     .flip-card-front {{
-      background: white;
-      font-size: 42px;
-      font-weight: 700;
-      color: #0f172a;
+        background: white;
+        font-size: 32px;
+        font-weight: bold;
     }}
 
     .flip-card-back {{
-      background: #1e3a8a;
-      color: white;
-      transform: rotateY(180deg);
-      font-size: 32px;
-      font-weight: 600;
+        background: #1e3a8a;
+        color: white;
+        transform: rotateY(180deg);
+        font-size: 26px;
     }}
     </style>
 
-    <div class="flip-card">
-      <div class="flip-card-inner">
-        <div class="flip-card-front">
-          {front}
+    <div class="card-container">
+        <div class="flip-card {flipped_class}">
+            <div class="flip-card-inner">
+                <div class="flip-card-front">
+                    {front}
+                </div>
+                <div class="flip-card-back">
+                    {back}
+                </div>
+            </div>
         </div>
-        <div class="flip-card-back">
-          {back}
-        </div>
-      </div>
     </div>
     """, unsafe_allow_html=True)
 
-    col_a, col_b, col_c = st.columns([1, 1, 1])
-
-    with col_b:
-        if st.button("Next card"):
-            st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
-            st.rerun()
-
-    st.subheader("Filtered vocabulary")
-    st.dataframe(
-        filtered[["id", "english", "translation_fr", "part_of_speech", "level", "family"]],
-        use_container_width=True,
-        hide_index=True
-    )
-
+    # Next card
+    if st.button("Next card"):
+        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
+        st.session_state.card_flipped = False
+        st.rerun()
 
 # =========================
 # QUIZ
