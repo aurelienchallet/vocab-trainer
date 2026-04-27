@@ -288,8 +288,6 @@ if page == "Home":
     """)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.subheader("Dataset preview")
-    st.dataframe(vocab.head(25), use_container_width=True, hide_index=True)
 
 
 # =========================
