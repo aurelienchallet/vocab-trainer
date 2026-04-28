@@ -348,91 +348,45 @@ elif page == "Training":
         front = word["translation_fr"]
         back = word["english"]
 
-    flip_class = "flipped" if st.session_state.card_flipped else ""
+    display_text = back if st.session_state.card_flipped else front
+    bg_color = "#1e3a8a" if st.session_state.card_flipped else "white"
+    text_color = "white" if st.session_state.card_flipped else "#0f172a"
 
     st.markdown(f"""
     <style>
-    .card-container {{
-        display: flex;
-        justify-content: center;
-        margin-top: 35px;
-        margin-bottom: 25px;
-    }}
-
-    .flip-card {{
+    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:nth-of-type(2) div.stButton > button {{
         width: 430px;
         height: 240px;
-        perspective: 1000px;
-    }}
-
-    .flip-card-inner {{
-        position: relative;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-        transition: transform 0.6s;
-        transform-style: preserve-3d;
-    }}
-
-    .flip-card.flipped .flip-card-inner {{
-        transform: rotateY(180deg);
-    }}
-
-    .flip-card-front,
-    .flip-card-back {{
-        position: absolute;
-        width: 100%;
-        height: 100%;
         border-radius: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        backface-visibility: hidden;
-        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.12);
-        padding: 28px;
+        border: none;
+        background-color: {bg_color};
+        color: {text_color};
+        font-size: 34px;
         font-weight: 700;
-        text-align: center;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.12);
+        transition: all 0.2s ease;
     }}
 
-    .flip-card-front {{
-        background: white;
-        color: #0f172a;
-        font-size: 38px;
-    }}
-
-    .flip-card-back {{
-        background: #1e3a8a;
-        color: white;
-        transform: rotateY(180deg);
-        font-size: 30px;
+    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:nth-of-type(2) div.stButton > button:hover {{
+        transform: scale(1.02);
+        border: none;
+        color: {text_color};
+        background-color: {bg_color};
     }}
     </style>
-
-    <div class="card-container">
-        <div class="flip-card {flip_class}">
-            <div class="flip-card-inner">
-                <div class="flip-card-front">{front}</div>
-                <div class="flip-card-back">{back}</div>
-            </div>
-        </div>
-    </div>
     """, unsafe_allow_html=True)
 
-    col_a, col_b, col_c = st.columns([1, 1, 1])
+    col_left, col_card, col_right = st.columns([1, 1, 1])
 
-    with col_a:
-        if st.button("Flip card"):
+    with col_card:
+        if st.button(display_text, key="flashcard_button"):
             st.session_state.card_flipped = not st.session_state.card_flipped
             st.rerun()
 
+    col_a, col_b, col_c = st.columns([1, 1, 1])
+
     with col_b:
         if st.button("Next card"):
-            st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
-            st.session_state.card_flipped = False
-            st.rerun()
-
-    with col_c:
-        if st.button("New flashcard"):
             st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
             st.session_state.card_flipped = False
             st.rerun()
