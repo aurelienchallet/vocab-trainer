@@ -294,84 +294,148 @@ if page == "Home":
 # TRAINING
 # =========================
 
-import streamlit as st
-import pandas as pd
-import random
+elif page == "Training":
+    st.title("Training Mode")
 
-# Exemple de vocabulaire (remplace par ton CSV)
-vocab = pd.DataFrame({
-    "english": ["dog", "shelter", "code", "apple", "non-profit"],
-    "translation_fr": ["chien", "abri", "code", "pomme", "organisme à but non lucratif"],
-})
+    # Colonnes pour filtrer le vocabulaire
+    col1, col2, col3 = st.columns(3)
 
-# Initialisation de la session
-if "card_flipped" not in st.session_state:
-    st.session_state.card_flipped = False
+    with col1:
+        level = st.selectbox("Level", ["All"] + sorted(vocab["level"].unique()))
 
-if "training_word" not in st.session_state:
-    st.session_state.training_word = vocab.sample(1).iloc[0].to_dict()
+    with col2:
+        word_type = st.selectbox("Type", ["All"] + sorted(vocab["part_of_speech"].unique()))
 
-# Fonction de filtrage
-def filter_vocab(vocab, level, word_type, family):
-    return vocab  # Pas de filtre dans cet exemple, mais tu peux ajouter des filtres selon les besoins
+    with col3:
+        family = st.selectbox("Family", ["All"] + sorted(vocab["family"].unique()))
 
-# Direction du flashcard
-direction = st.radio("Direction", ["English → French", "French → English"])
+    # Direction pour la traduction
+    direction = st.radio(
+        "Direction",
+        ["English → French", "French → English"],
+        horizontal=True
+    )
 
-# Fonction pour afficher la carte
-def display_card(front, back):
-    if st.session_state.card_flipped:
-        return back
+    # Filtrer les données selon les critères sélectionnés
+    filtered = filter_vocab(vocab, level, word_type, family)
+
+    # Rechercher dans les mots filtrés
+    search = st.text_input("Search")
+
+    if search:
+        s = search.lower()
+        filtered = filtered[
+            filtered["english"].str.lower().str.contains(s)
+            | filtered["translation_fr"].str.lower().str.contains(s)
+        ]
+
+    st.write(f"Results: **{len(filtered)}**")
+
+    if len(filtered) == 0:
+        st.warning("No words found.")
+        st.stop()
+
+    # Sélection d'un mot de manière aléatoire
+    if "training_word" not in st.session_state:
+        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
+
+    # Affichage de la carte
+    word = st.session_state.training_word
+
+    if direction == "English → French":
+        front = word["english"]
+        back = word["translation_fr"]
     else:
-        return front
+        front = word["translation_fr"]
+        back = word["english"]
 
-# Définition du mot de la carte
-word = st.session_state.training_word
-if direction == "English → French":
-    front = word["english"]
-    back = word["translation_fr"]
-else:
-    front = word["translation_fr"]
-    back = word["english"]
+    # Ajout du CSS pour personnaliser la carte et le bouton
+    st.markdown("""
+    <style>
+        .flip-card {
+            background-color: transparent;
+            width: 100%;  /* Largeur de la carte */
+            height: 220px;  /* Hauteur de la carte */
+            perspective: 1000px;
+        }
 
-# CSS pour la carte
-st.markdown("""
-<style>
-.flip-card {
-    width: 800px;
-    height: 620px;
-    border-radius: 15px;
-    background-color: white;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 36px;
-    font-weight: bold;
-}
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
 
-.flip-card-flipped {
-    background-color: #1e3a8a;
-    color: white;
-}
+        .flip-card:active .flip-card-inner {
+            transform: rotateY(180deg);
+        }
 
-</style>
-""", unsafe_allow_html=True)
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backface-visibility: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
 
-# Affichage de la carte
-col1, col2, col3 = st.columns([1, 3, 1])
+        .flip-card-front {
+            background: white;
+            font-size: 36px;
+            font-weight: bold;
+        }
 
-with col2:
-    if st.button(display_card(front, back), key="flashcard_button"):
-        st.session_state.card_flipped = not st.session_state.card_flipped
+        .flip-card-back {
+            background: #1e3a8a;
+            color: white;
+            transform: rotateY(180deg);
+            font-size: 28px;
+        }
+
+        /* Style pour le bouton */
+        .big-button {
+            width: 100%;  /* Largeur du bouton égale à celle de la carte */
+            height: 220px;  /* Hauteur du bouton égale à la hauteur de la carte */
+            font-size: 36px;  /* Taille du texte pour qu'il soit plus grand */
+            background-color: #1e3a8a;  /* Couleur de fond du bouton */
+            color: white;  /* Couleur du texte */
+            border: none;  /* Pas de bordure */
+            border-radius: 10px;  /* Arrondi des coins */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;  /* Curseur en forme de main */
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Carte flip
+    st.markdown(f"""
+    <div class="flip-card">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          {front}
+        </div>
+        <div class="flip-card-back">
+          {back}
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Le bouton pour passer à la carte suivante, intégré dans la carte
+    st.markdown('<button class="big-button">Next card</button>', unsafe_allow_html=True)
+
+    # Lorsque l'utilisateur clique sur "Next card", on recharge un mot aléatoire
+    if st.button("Next card"):
+        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
         st.rerun()
-
-# Bouton pour la nouvelle carte
-if st.button("Next card"):
-    st.session_state.training_word = vocab.sample(1).iloc[0].to_dict()
-    st.session_state.card_flipped = False
-    st.rerun()
 
 
 # =========================
