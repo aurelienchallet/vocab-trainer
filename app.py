@@ -338,8 +338,8 @@ else:
 st.markdown("""
 <style>
 .flip-card {
-    width: 400px;
-    height: 220px;
+    width: 800px;
+    height: 620px;
     border-radius: 15px;
     background-color: white;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
