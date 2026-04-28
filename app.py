@@ -348,7 +348,7 @@ elif page == "Training":
         front = word["translation_fr"]
         back = word["english"]
 
-   display_text = back if st.session_state.card_flipped else front
+    display_text = back if st.session_state.card_flipped else front
     bg_color = "#1e3a8a" if st.session_state.card_flipped else "white"
     text_color = "white" if st.session_state.card_flipped else "#0f172a"
 
