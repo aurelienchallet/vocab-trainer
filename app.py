@@ -348,13 +348,13 @@ elif page == "Training":
         front = word["translation_fr"]
         back = word["english"]
 
-    display_text = back if st.session_state.card_flipped else front
+   display_text = back if st.session_state.card_flipped else front
     bg_color = "#1e3a8a" if st.session_state.card_flipped else "white"
     text_color = "white" if st.session_state.card_flipped else "#0f172a"
 
     st.markdown(f"""
     <style>
-    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:nth-of-type(2) div.stButton > button {{
+    button[data-testid="baseButton"][key="flashcard_button"] {{
         width: 430px;
         height: 240px;
         border-radius: 24px;
@@ -367,28 +367,18 @@ elif page == "Training":
         transition: all 0.2s ease;
     }}
 
-    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:nth-of-type(2) div.stButton > button:hover {{
+    button[data-testid="baseButton"][key="flashcard_button"]:hover {{
         transform: scale(1.02);
-        border: none;
-        color: {text_color};
-        background-color: {bg_color};
     }}
     </style>
     """, unsafe_allow_html=True)
 
-    col_left, col_card, col_right = st.columns([1, 1, 1])
+    # centrage
+    col1, col2, col3 = st.columns([1,2,1])
 
-    with col_card:
+    with col2:
         if st.button(display_text, key="flashcard_button"):
             st.session_state.card_flipped = not st.session_state.card_flipped
-            st.rerun()
-
-    col_a, col_b, col_c = st.columns([1, 1, 1])
-
-    with col_b:
-        if st.button("Next card"):
-            st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
-            st.session_state.card_flipped = False
             st.rerun()
 
 # =========================
