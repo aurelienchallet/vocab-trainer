@@ -290,96 +290,89 @@ if page == "Home":
 
 
 
-
-
 # =========================
 # TRAINING
 # =========================
 
-elif page == "Training":
-    st.title("Training Mode")
+import streamlit as st
+import pandas as pd
+import random
 
-    col1, col2, col3 = st.columns(3)
+# Exemple de vocabulaire (remplace par ton CSV)
+vocab = pd.DataFrame({
+    "english": ["dog", "shelter", "code", "apple", "non-profit"],
+    "translation_fr": ["chien", "abri", "code", "pomme", "organisme à but non lucratif"],
+})
 
-    with col1:
-        level = st.selectbox("Level", ["All"] + sorted(vocab["level"].dropna().unique()))
+# Initialisation de la session
+if "card_flipped" not in st.session_state:
+    st.session_state.card_flipped = False
 
-    with col2:
-        word_type = st.selectbox("Type", ["All"] + sorted(vocab["part_of_speech"].dropna().unique()))
+if "training_word" not in st.session_state:
+    st.session_state.training_word = vocab.sample(1).iloc[0].to_dict()
 
-    with col3:
-        family = st.selectbox("Family", ["All"] + sorted(vocab["family"].dropna().unique()))
+# Fonction de filtrage
+def filter_vocab(vocab, level, word_type, family):
+    return vocab  # Pas de filtre dans cet exemple, mais tu peux ajouter des filtres selon les besoins
 
-    direction = st.radio(
-        "Direction",
-        ["English → French", "French → English"],
-        horizontal=True
-    )
+# Direction du flashcard
+direction = st.radio("Direction", ["English → French", "French → English"])
 
-    filtered = filter_vocab(vocab, level, word_type, family)
-
-    search = st.text_input("Search")
-
-    if search:
-        s = search.lower()
-        filtered = filtered[
-            filtered["english"].str.lower().str.contains(s, na=False)
-            | filtered["translation_fr"].str.lower().str.contains(s, na=False)
-        ]
-
-    st.write(f"Results: **{len(filtered)}**")
-
-    if len(filtered) == 0:
-        st.warning("No words found.")
-        st.stop()
-
-    if "training_word" not in st.session_state:
-        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
-
-    if "card_flipped" not in st.session_state:
-        st.session_state.card_flipped = False
-
-    word = st.session_state.training_word
-
-    if direction == "English → French":
-        front = word["english"]
-        back = word["translation_fr"]
+# Fonction pour afficher la carte
+def display_card(front, back):
+    if st.session_state.card_flipped:
+        return back
     else:
-        front = word["translation_fr"]
-        back = word["english"]
+        return front
 
-    display_text = back if st.session_state.card_flipped else front
-    bg_color = "#1e3a8a" if st.session_state.card_flipped else "white"
-    text_color = "white" if st.session_state.card_flipped else "#0f172a"
+# Définition du mot de la carte
+word = st.session_state.training_word
+if direction == "English → French":
+    front = word["english"]
+    back = word["translation_fr"]
+else:
+    front = word["translation_fr"]
+    back = word["english"]
 
-    st.markdown(f"""
-    <style>
-    button[data-testid="baseButton"][key="flashcard_button"] {{
-        width: 430px;
-        height: 240px;
-        border-radius: 24px;
-        border: none;
-        background-color: {bg_color};
-        color: {text_color};
-        font-size: 34px;
-        font-weight: 700;
-        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.12);
-        transition: all 0.2s ease;
-    }}
+# CSS pour la carte
+st.markdown("""
+<style>
+.flip-card {
+    width: 400px;
+    height: 220px;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 36px;
+    font-weight: bold;
+}
 
-    button[data-testid="baseButton"][key="flashcard_button"]:hover {{
-        transform: scale(1.02);
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+.flip-card-flipped {
+    background-color: #1e3a8a;
+    color: white;
+}
 
-    # centrage
-    col1, col2, col3 = st.columns([1,2,1])
+</style>
+""", unsafe_allow_html=True)
 
-    with col2:
-        if st.button(display_text, key="flashcard_button"):
-            st.session_state.card_flipped = not st.session_state.card_flipped
-            st.rerun()
+# Affichage de la carte
+col1, col2, col3 = st.columns([1, 3, 1])
+
+with col2:
+    if st.button(display_card(front, back), key="flashcard_button"):
+        st.session_state.card_flipped = not st.session_state.card_flipped
+        st.rerun()
+
+# Bouton pour la nouvelle carte
+if st.button("Next card"):
+    st.session_state.training_word = vocab.sample(1).iloc[0].to_dict()
+    st.session_state.card_flipped = False
+    st.rerun()
+
 
 # =========================
 # QUIZ
