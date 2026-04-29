@@ -415,27 +415,38 @@ elif page == "Training":
     </style>
     """, unsafe_allow_html=True)
 
-    # Carte flip
-    st.markdown(f"""
-    <div class="flip-card">
-      <div class="flip-card-inner">
-        <div class="flip-card-front">
-          {front}
-        </div>
-        <div class="flip-card-back">
-          {back}
-        </div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+   st.markdown("""
+<style>
+div.stButton > button {
+    width: 420px;
+    height: 230px;
+    display: block;
+    margin: 40px auto 20px auto;
+    border-radius: 24px;
+    border: 2px solid #ddd;
+    background-color: white;
+    font-size: 36px;
+    font-weight: 700;
+    color: #222;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transition: all 0.2s ease-in-out;
+}
 
-    # Le bouton pour passer à la carte suivante, intégré dans la carte
-    st.markdown('<button class="big-button">Next card</button>', unsafe_allow_html=True)
+div.stButton > button:hover {
+    transform: scale(1.03);
+    border-color: #aaa;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+}
+</style>
+""", unsafe_allow_html=True)
 
-    # Lorsque l'utilisateur clique sur "Next card", on recharge un mot aléatoire
-    if st.button("Next card"):
-        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
-        st.rerun()
+if "show_translation" not in st.session_state:
+    st.session_state.show_translation = False
+
+card_text = current_word["french"] if st.session_state.show_translation else current_word["english"]
+
+if st.button(card_text, key="flashcard_button"):
+    st.session_state.show_translation = not st.session_state.show_translation
 
 
 # =========================
