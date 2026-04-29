@@ -300,6 +300,18 @@ elif page == "Training":
 
     st.title("English Vocabulary Training")
 
+    # --- Liste de mots ---
+    if "words" not in st.session_state:
+        st.session_state.words = [
+            {"english": "achieve", "french": "atteindre"},
+            {"english": "improve", "french": "améliorer"},
+            {"english": "increase", "french": "augmenter"},
+            {"english": "decrease", "french": "diminuer"},
+        ]
+
+    words = st.session_state.words
+
+    # --- États ---
     if "show_translation" not in st.session_state:
         st.session_state.show_translation = False
 
@@ -308,13 +320,14 @@ elif page == "Training":
 
     current_word = words[st.session_state.current_word_index]
 
+    # --- Style carte centrée ---
     st.markdown("""
     <style>
     div.stButton > button {
         width: 420px;
         height: 230px;
         display: block;
-        margin: 50px auto 20px auto;
+        margin: 50px auto;
         border-radius: 24px;
         font-size: 36px;
         font-weight: 700;
@@ -322,16 +335,20 @@ elif page == "Training":
     </style>
     """, unsafe_allow_html=True)
 
+    # --- Texte carte ---
     if st.session_state.show_translation:
         card_text = current_word["french"]
     else:
         card_text = current_word["english"]
 
+    # --- Carte (flip) ---
     if st.button(card_text, key="card_button"):
         st.session_state.show_translation = not st.session_state.show_translation
         st.rerun()
 
+    # --- Next word ---
     if st.button("Next word", key="next_word_button"):
+
         new_index = random.randint(0, len(words) - 1)
 
         while new_index == st.session_state.current_word_index and len(words) > 1:
