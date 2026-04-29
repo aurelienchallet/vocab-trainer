@@ -81,6 +81,30 @@ st.markdown("""
     font-weight: 600;
     margin-right: 6px;
 }
+
+/* Sidebar buttons */
+section[data-testid="stSidebar"] {
+    background-color: #f1f5f9;
+}
+
+section[data-testid="stSidebar"] .stButton > button {
+    width: 100%;
+    height: 62px;
+    border-radius: 18px;
+    border: 1px solid #dbeafe;
+    background-color: white;
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    box-shadow: 0 5px 15px rgba(15, 23, 42, 0.08);
+}
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+    color: #1e3a8a;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -241,15 +265,28 @@ merged["status"] = merged["status"].fillna("new")
 
 st.sidebar.title("Navigation")
 
-page = st.sidebar.radio(
-    "Choose a page",
-    ["Home", "Training", "Quiz", "Progression", "Difficult Words"]
-)
+if "page" not in st.session_state:
+    st.session_state.page = "Home"
 
-st.sidebar.divider()
+with st.sidebar:
+    if st.button("🏠 Home"):
+        st.session_state.page = "Home"
 
-st.sidebar.caption("Dataset")
-st.sidebar.write(f"{len(vocab)} entries loaded")
+    if st.button("📚 Training"):
+        st.session_state.page = "Training"
+
+    if st.button("✍️ Quiz"):
+        st.session_state.page = "Quiz"
+
+    if st.button("🔥 Difficult Words"):
+        st.session_state.page = "Difficult Words"
+
+    st.divider()
+
+    st.caption("Dataset")
+    st.write(f"{len(vocab)} entries loaded")
+
+page = st.session_state.page
 
 
 # =========================
@@ -260,34 +297,20 @@ if page == "Home":
     st.markdown("""
     <div class="hero">
         <h1>English Vocabulary Trainer</h1>
-        <p>Train English vocabulary, verbs and phrasal verbs with quizzes, categories and progress tracking.</p>
+        <p>Train English vocabulary, verbs and phrasal verbs with flashcards, quizzes and focused practice.</p>
     </div>
     """, unsafe_allow_html=True)
-
-    total = len(merged)
-    seen = int((merged["seen_count"] > 0).sum())
-    mastered = int((merged["status"] == "mastered").sum())
-    difficult = int((merged["status"] == "difficult").sum())
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric("Total words", total)
-    col2.metric("Seen", seen)
-    col3.metric("Mastered", mastered)
-    col4.metric("Difficult", difficult)
 
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("What this app does")
     st.write("""
-    This app helps you train English vocabulary in a structured way:
-    
-    1. Training mode to revise freely by level, type and family.
-    2. Quiz mode with adaptive tracking.
-    3. Progression dashboard to monitor your results.
-    4. Difficult words page to focus on weaknesses.
+    This app helps you train English vocabulary in a simple and practical way:
+
+    1. Training mode to revise freely with interactive flashcards.
+    2. Quiz mode to test your knowledge.
+    3. Difficult words page to focus on words that need more practice.
     """)
     st.markdown('</div>', unsafe_allow_html=True)
-
 
 
 # =========================
@@ -361,6 +384,8 @@ elif page == "Training":
             st.session_state.current_word_index = new_index
             st.session_state.show_translation = False
             st.rerun()
+
+
 # =========================
 # QUIZ
 # =========================
@@ -477,68 +502,6 @@ elif page == "Quiz":
             st.rerun()
 
     st.write(f"Score: **{st.session_state.quiz_score}/{idx + 1}**")
-
-
-# =========================
-# PROGRESSION
-# =========================
-
-elif page == "Progression":
-    st.title("Progression")
-
-    total = len(merged)
-    seen = int((merged["seen_count"] > 0).sum())
-    correct = int(merged["correct_count"].sum())
-    wrong = int(merged["wrong_count"].sum())
-    mastered = int((merged["status"] == "mastered").sum())
-    difficult = int((merged["status"] == "difficult").sum())
-
-    accuracy = correct / (correct + wrong) * 100 if (correct + wrong) > 0 else 0
-
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    col1.metric("Total", total)
-    col2.metric("Seen", seen)
-    col3.metric("Correct", correct)
-    col4.metric("Wrong", wrong)
-    col5.metric("Accuracy", f"{accuracy:.1f}%")
-
-    col6, col7 = st.columns(2)
-    col6.metric("Mastered", mastered)
-    col7.metric("Difficult", difficult)
-
-    st.divider()
-
-    st.subheader("Progress by family")
-
-    family_stats = merged.groupby("family").agg(
-        total=("id", "count"),
-        seen=("seen_count", lambda x: int((x > 0).sum())),
-        correct=("correct_count", "sum"),
-        wrong=("wrong_count", "sum")
-    ).reset_index()
-
-    family_stats["progress_%"] = (family_stats["seen"] / family_stats["total"] * 100).round(1)
-
-    st.dataframe(family_stats, use_container_width=True, hide_index=True)
-
-    st.subheader("Progress by level")
-
-    level_stats = merged.groupby("level").agg(
-        total=("id", "count"),
-        seen=("seen_count", lambda x: int((x > 0).sum())),
-        correct=("correct_count", "sum"),
-        wrong=("wrong_count", "sum")
-    ).reset_index()
-
-    level_stats["progress_%"] = (level_stats["seen"] / level_stats["total"] * 100).round(1)
-
-    st.dataframe(level_stats, use_container_width=True, hide_index=True)
-
-    if st.button("Reset all progress"):
-        if PROGRESS_PATH.exists():
-            PROGRESS_PATH.unlink()
-        st.success("Progress reset. Refresh the page.")
 
 
 # =========================
