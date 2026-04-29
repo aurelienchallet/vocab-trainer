@@ -300,64 +300,46 @@ elif page == "Training":
 
     st.title("English Vocabulary Training")
 
-    # --- Initialisation ---
-    if "words" not in st.session_state:
-        st.session_state.words = [
-            {"english": "achieve", "french": "atteindre"},
-            {"english": "improve", "french": "améliorer"},
-            {"english": "increase", "french": "augmenter"},
-            {"english": "decrease", "french": "diminuer"},
-        ]
-
-    if "current_word" not in st.session_state:
-        st.session_state.current_word = random.choice(st.session_state.words)
-
     if "show_translation" not in st.session_state:
         st.session_state.show_translation = False
 
-    # --- Style carte ---
+    if "current_word_index" not in st.session_state:
+        st.session_state.current_word_index = random.randint(0, len(words) - 1)
+
+    current_word = words[st.session_state.current_word_index]
+
     st.markdown("""
     <style>
     div.stButton > button {
         width: 420px;
         height: 230px;
         display: block;
-        margin: 80px auto;
+        margin: 50px auto 20px auto;
         border-radius: 24px;
-        border: 2px solid #ddd;
-        background-color: white;
         font-size: 36px;
         font-weight: 700;
-        color: #222;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        transition: all 0.2s ease-in-out;
-    }
-
-    div.stButton > button:hover {
-        transform: scale(1.03);
-        border-color: #aaa;
-        box-shadow: 0 12px 32px rgba(0,0,0,0.18);
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # --- Texte affiché ---
     if st.session_state.show_translation:
-        card_text = st.session_state.current_word["french"]
+        card_text = current_word["french"]
     else:
-        card_text = st.session_state.current_word["english"]
+        card_text = current_word["english"]
 
-    # --- Carte cliquable ---
-    if st.button(card_text, key="flashcard"):
+    if st.button(card_text, key="card_button"):
         st.session_state.show_translation = not st.session_state.show_translation
+        st.rerun()
 
-    # --- Mot suivant ---
-    st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
-    if st.button("Next word"):
-        st.session_state.current_word = random.choice(st.session_state.words)
+    if st.button("Next word", key="next_word_button"):
+        new_index = random.randint(0, len(words) - 1)
+
+        while new_index == st.session_state.current_word_index and len(words) > 1:
+            new_index = random.randint(0, len(words) - 1)
+
+        st.session_state.current_word_index = new_index
         st.session_state.show_translation = False
-    st.markdown("</div>", unsafe_allow_html=True)
-
+        st.rerun()
 # =========================
 # QUIZ
 # =========================
