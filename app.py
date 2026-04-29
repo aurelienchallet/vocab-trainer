@@ -23,6 +23,8 @@ PROGRESS_PATH = Path("progress.csv")
 # STYLE
 # =========================
 
+st.markdown("""
+<style>
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #0f172a, #1e293b);
 }
@@ -34,6 +36,16 @@ PROGRESS_PATH = Path("progress.csv")
 .block-container {
     background: transparent;
 }
+
+.hero {
+    padding: 35px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color: white;
+    margin-bottom: 25px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 .hero {
     padding: 35px;
