@@ -4,6 +4,7 @@ import random
 import unicodedata
 from datetime import date, timedelta
 from pathlib import Path
+from streamlit_option_menu import option_menu
 
 # =========================
 # CONFIG
@@ -266,40 +267,52 @@ merged["wrong_count"] = merged["wrong_count"].fillna(0)
 merged["status"] = merged["status"].fillna("new")
 
 
-/* === SIDEBAR === */
-section[data-testid="stSidebar"] {
-    background-color: #edf1f7;
-}
+from streamlit_option_menu import option_menu
 
-.sidebar-title {
-    font-size: 24px;
-    font-weight: 500;
-    color: #111827;
-    line-height: 1.45;
-    padding: 12px 8px 18px 8px;
-}
+# =========================
+# SIDEBAR
+# =========================
 
-section[data-testid="stSidebar"] .stButton > button {
-    width: 100%;
-    min-height: 48px;
-    border-radius: 6px;
-    border: none;
-    background-color: transparent;
-    color: #374151;
-    font-size: 16px;
-    font-weight: 400;
-    text-align: left;
-    justify-content: flex-start;
-    padding-left: 16px;
-    margin-bottom: 6px;
-    box-shadow: none;
-}
+with st.sidebar:
 
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background-color: #e0e7ff;
-    color: #1d4ed8;
-}
+    st.markdown("""
+    <div style="font-size:24px; font-weight:500; line-height:1.4; padding:10px;">
+        📚<br>
+        English<br>
+        Vocabulary<br>
+        Trainer
+    </div>
+    """, unsafe_allow_html=True)
 
+    selected = option_menu(
+        menu_title=None,
+        options=["Home", "Training", "Quiz", "Difficult Words"],
+        icons=["house", "book", "pencil", "exclamation-triangle"],
+        default_index=0,
+        styles={
+            "container": {
+                "padding": "0!important",
+                "background-color": "#edf1f7"
+            },
+            "icon": {
+                "color": "#6b7280",
+                "font-size": "18px"
+            },
+            "nav-link": {
+                "font-size": "16px",
+                "text-align": "left",
+                "margin": "4px 0",
+                "color": "#374151",
+                "--hover-color": "#e0e7ff",
+            },
+            "nav-link-selected": {
+                "background-color": "#4f6bdc",
+                "color": "white",
+            },
+        }
+    )
+
+page = selected
 
 # =========================
 # HOME
