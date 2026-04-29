@@ -349,16 +349,18 @@ elif page == "Training":
             st.rerun()
 
     # --- Next word ---
-    if st.button("Next word", key="next_word_button"):
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-        new_index = random.randint(0, len(words) - 1)
-
-        while new_index == st.session_state.current_word_index and len(words) > 1:
+    with col2:
+        if st.button("Next word", key="next_word_button"):
             new_index = random.randint(0, len(words) - 1)
 
-        st.session_state.current_word_index = new_index
-        st.session_state.show_translation = False
-        st.rerun()
+            while new_index == st.session_state.current_word_index and len(words) > 1:
+                new_index = random.randint(0, len(words) - 1)
+
+            st.session_state.current_word_index = new_index
+            st.session_state.show_translation = False
+            st.rerun()
 # =========================
 # QUIZ
 # =========================
