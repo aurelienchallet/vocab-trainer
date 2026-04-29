@@ -266,45 +266,39 @@ merged["wrong_count"] = merged["wrong_count"].fillna(0)
 merged["status"] = merged["status"].fillna("new")
 
 
-# =========================
-# SIDEBAR
-# =========================
-
-st.sidebar.markdown("""
-<div class="sidebar-title">
-    <div class="sidebar-icon">📚</div>
-    <div>
-        <div>English</div>
-        <div>Vocabulary</div>
-        <div>Trainer</div>
-    </div>
-</div>
-<hr>
-""", unsafe_allow_html=True)
-
-if "page" not in st.session_state:
-    st.session_state.page = "Home"
-
-menu_items = {
-    "Home": "⌂  Home",
-    "Training": "▣  Training",
-    "Quiz": "✎  Quiz",
-    "Difficult Words": "⚠  Difficult Words"
+/* === SIDEBAR === */
+section[data-testid="stSidebar"] {
+    background-color: #edf1f7;
 }
 
-with st.sidebar:
-    for page_name, label in menu_items.items():
-        active_class = "active-menu" if st.session_state.page == page_name else "inactive-menu"
+.sidebar-title {
+    font-size: 24px;
+    font-weight: 500;
+    color: #111827;
+    line-height: 1.45;
+    padding: 12px 8px 18px 8px;
+}
 
-        if st.button(label, key=f"nav_{page_name}", use_container_width=True):
-            st.session_state.page = page_name
-            st.rerun()
+section[data-testid="stSidebar"] .stButton > button {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 6px;
+    border: none;
+    background-color: transparent;
+    color: #374151;
+    font-size: 16px;
+    font-weight: 400;
+    text-align: left;
+    justify-content: flex-start;
+    padding-left: 16px;
+    margin-bottom: 6px;
+    box-shadow: none;
+}
 
-    st.divider()
-    st.caption("Dataset")
-    st.write(f"{len(vocab)} entries loaded")
-
-page = st.session_state.page
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: #e0e7ff;
+    color: #1d4ed8;
+}
 
 
 # =========================
