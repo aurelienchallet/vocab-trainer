@@ -26,7 +26,7 @@ PROGRESS_PATH = Path("progress.csv")
 st.markdown("""
 <style>
 .main {
-    background-color: #f8fafc;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
 }
 
 .hero {
