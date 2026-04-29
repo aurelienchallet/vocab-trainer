@@ -23,7 +23,7 @@ PROGRESS_PATH = Path("progress.csv")
 # STYLE
 # =========================
 
-.main {
+st.markdown.main {
     background-color: #f8fafc;
 }
 
