@@ -25,6 +25,8 @@ PROGRESS_PATH = Path("progress.csv")
 
 st.markdown("""
 <style>
+
+/* === BACKGROUND GLOBAL === */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #0f172a, #1e293b);
 }
@@ -37,16 +39,8 @@ st.markdown("""
     background: transparent;
 }
 
-.hero {
-    padding: 35px;
-    border-radius: 24px;
-    background: linear-gradient(135deg, #0f172a, #1e3a8a);
-    color: white;
-    margin-bottom: 25px;
-}
-</style>
-""", unsafe_allow_html=True)
 
+/* === HERO === */
 .hero {
     padding: 35px;
     border-radius: 24px;
@@ -60,6 +54,8 @@ st.markdown("""
     margin-bottom: 10px;
 }
 
+
+/* === CARDS === */
 .card {
     padding: 25px;
     border-radius: 20px;
@@ -100,7 +96,8 @@ st.markdown("""
     margin-right: 6px;
 }
 
-/* Sidebar buttons */
+
+/* === SIDEBAR === */
 section[data-testid="stSidebar"] {
     background-color: #f1f5f9;
 }
@@ -123,9 +120,9 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     border-color: #3b82f6;
     color: #1e3a8a;
 }
+
 </style>
 """, unsafe_allow_html=True)
-
 
 # =========================
 # HELPERS
