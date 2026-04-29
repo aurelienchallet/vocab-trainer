@@ -23,8 +23,12 @@ PROGRESS_PATH = Path("progress.csv")
 # STYLE
 # =========================
 
-st.markdown.main {
-    background-color: #f8fafc;
+st.markdown("""
+<style>
+
+/* === BACKGROUND GLOBAL === */
+[data-testid="stAppViewContainer"] {
+    background: #f8fafc;
 }
 
 
