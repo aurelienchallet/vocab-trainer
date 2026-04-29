@@ -341,10 +341,12 @@ elif page == "Training":
     else:
         card_text = current_word["english"]
 
-    # --- Carte (flip) ---
-    if st.button(card_text, key="card_button"):
-        st.session_state.show_translation = not st.session_state.show_translation
-        st.rerun()
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col2:
+        if st.button(card_text, key="card_button"):
+            st.session_state.show_translation = not st.session_state.show_translation
+            st.rerun()
 
     # --- Next word ---
     if st.button("Next word", key="next_word_button"):
