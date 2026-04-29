@@ -323,27 +323,50 @@ elif page == "Training":
 
     st.title("English Vocabulary Training")
 
-    # --- Liste de mots ---
-    if "words" not in st.session_state:
-        st.session_state.words = [
-            {"english": "achieve", "french": "atteindre"},
-            {"english": "improve", "french": "améliorer"},
-            {"english": "increase", "french": "augmenter"},
-            {"english": "decrease", "french": "diminuer"},
-        ]
+    col1, col2, col3 = st.columns(3)
 
-    words = st.session_state.words
+    with col1:
+        level = st.selectbox(
+            "Level",
+            ["All"] + sorted(vocab["level"].unique()),
+            key="training_level"
+        )
 
-    # --- États ---
+    with col2:
+        word_type = st.selectbox(
+            "Type",
+            ["All"] + sorted(vocab["part_of_speech"].unique()),
+            key="training_type"
+        )
+
+    with col3:
+        family = st.selectbox(
+            "Family",
+            ["All"] + sorted(vocab["family"].unique()),
+            key="training_family"
+        )
+
+    filtered_vocab = filter_vocab(vocab, level, word_type, family)
+
+    if len(filtered_vocab) == 0:
+        st.warning("No words found with these filters.")
+        st.stop()
+
+    words = filtered_vocab.rename(columns={
+        "translation_fr": "french"
+    }).to_dict("records")
+
     if "show_translation" not in st.session_state:
         st.session_state.show_translation = False
 
     if "current_word_index" not in st.session_state:
         st.session_state.current_word_index = random.randint(0, len(words) - 1)
 
+    if st.session_state.current_word_index >= len(words):
+        st.session_state.current_word_index = random.randint(0, len(words) - 1)
+
     current_word = words[st.session_state.current_word_index]
 
-    # --- Style carte centrée ---
     st.markdown("""
     <style>
     div.stButton > button {
@@ -358,7 +381,6 @@ elif page == "Training":
     </style>
     """, unsafe_allow_html=True)
 
-    # --- Texte carte ---
     if st.session_state.show_translation:
         card_text = current_word["french"]
     else:
@@ -371,7 +393,6 @@ elif page == "Training":
             st.session_state.show_translation = not st.session_state.show_translation
             st.rerun()
 
-    # --- Next word ---
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
