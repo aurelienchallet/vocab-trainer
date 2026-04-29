@@ -270,26 +270,37 @@ merged["status"] = merged["status"].fillna("new")
 # SIDEBAR
 # =========================
 
-st.sidebar.title("Navigation")
+st.sidebar.markdown("""
+<div class="sidebar-title">
+    <div class="sidebar-icon">📚</div>
+    <div>
+        <div>English</div>
+        <div>Vocabulary</div>
+        <div>Trainer</div>
+    </div>
+</div>
+<hr>
+""", unsafe_allow_html=True)
 
 if "page" not in st.session_state:
     st.session_state.page = "Home"
 
+menu_items = {
+    "Home": "⌂  Home",
+    "Training": "▣  Training",
+    "Quiz": "✎  Quiz",
+    "Difficult Words": "⚠  Difficult Words"
+}
+
 with st.sidebar:
-    if st.button("🏠 Home"):
-        st.session_state.page = "Home"
+    for page_name, label in menu_items.items():
+        active_class = "active-menu" if st.session_state.page == page_name else "inactive-menu"
 
-    if st.button("📚 Training"):
-        st.session_state.page = "Training"
-
-    if st.button("✍️ Quiz"):
-        st.session_state.page = "Quiz"
-
-    if st.button("🔥 Difficult Words"):
-        st.session_state.page = "Difficult Words"
+        if st.button(label, key=f"nav_{page_name}", use_container_width=True):
+            st.session_state.page = page_name
+            st.rerun()
 
     st.divider()
-
     st.caption("Dataset")
     st.write(f"{len(vocab)} entries loaded")
 
