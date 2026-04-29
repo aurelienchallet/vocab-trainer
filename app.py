@@ -295,159 +295,68 @@ if page == "Home":
 # =========================
 
 elif page == "Training":
-    st.title("Training Mode")
 
-    # Colonnes pour filtrer le vocabulaire
-    col1, col2, col3 = st.columns(3)
+    import random
 
-    with col1:
-        level = st.selectbox("Level", ["All"] + sorted(vocab["level"].unique()))
+    st.title("English Vocabulary Training")
 
-    with col2:
-        word_type = st.selectbox("Type", ["All"] + sorted(vocab["part_of_speech"].unique()))
-
-    with col3:
-        family = st.selectbox("Family", ["All"] + sorted(vocab["family"].unique()))
-
-    # Direction pour la traduction
-    direction = st.radio(
-        "Direction",
-        ["English → French", "French → English"],
-        horizontal=True
-    )
-
-    # Filtrer les données selon les critères sélectionnés
-    filtered = filter_vocab(vocab, level, word_type, family)
-
-    # Rechercher dans les mots filtrés
-    search = st.text_input("Search")
-
-    if search:
-        s = search.lower()
-        filtered = filtered[
-            filtered["english"].str.lower().str.contains(s)
-            | filtered["translation_fr"].str.lower().str.contains(s)
+    # --- Initialisation ---
+    if "words" not in st.session_state:
+        st.session_state.words = [
+            {"english": "achieve", "french": "atteindre"},
+            {"english": "improve", "french": "améliorer"},
+            {"english": "increase", "french": "augmenter"},
+            {"english": "decrease", "french": "diminuer"},
         ]
 
-    st.write(f"Results: **{len(filtered)}**")
+    if "current_word" not in st.session_state:
+        st.session_state.current_word = random.choice(st.session_state.words)
 
-    if len(filtered) == 0:
-        st.warning("No words found.")
-        st.stop()
+    if "show_translation" not in st.session_state:
+        st.session_state.show_translation = False
 
-    # Sélection d'un mot de manière aléatoire
-    if "training_word" not in st.session_state:
-        st.session_state.training_word = filtered.sample(1).iloc[0].to_dict()
-
-    # Affichage de la carte
-    word = st.session_state.training_word
-
-    if direction == "English → French":
-        front = word["english"]
-        back = word["translation_fr"]
-    else:
-        front = word["translation_fr"]
-        back = word["english"]
-
-    # Ajout du CSS pour personnaliser la carte et le bouton
+    # --- Style carte ---
     st.markdown("""
     <style>
-        .flip-card {
-            background-color: transparent;
-            width: 100%;  /* Largeur de la carte */
-            height: 220px;  /* Hauteur de la carte */
-            perspective: 1000px;
-        }
+    div.stButton > button {
+        width: 420px;
+        height: 230px;
+        display: block;
+        margin: 80px auto;
+        border-radius: 24px;
+        border: 2px solid #ddd;
+        background-color: white;
+        font-size: 36px;
+        font-weight: 700;
+        color: #222;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transition: all 0.2s ease-in-out;
+    }
 
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-
-        .flip-card:active .flip-card-inner {
-            transform: rotateY(180deg);
-        }
-
-        .flip-card-front, .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backface-visibility: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .flip-card-front {
-            background: white;
-            font-size: 36px;
-            font-weight: bold;
-        }
-
-        .flip-card-back {
-            background: #1e3a8a;
-            color: white;
-            transform: rotateY(180deg);
-            font-size: 28px;
-        }
-
-        /* Style pour le bouton */
-        .big-button {
-            width: 100%;  /* Largeur du bouton égale à celle de la carte */
-            height: 220px;  /* Hauteur du bouton égale à la hauteur de la carte */
-            font-size: 36px;  /* Taille du texte pour qu'il soit plus grand */
-            background-color: #1e3a8a;  /* Couleur de fond du bouton */
-            color: white;  /* Couleur du texte */
-            border: none;  /* Pas de bordure */
-            border-radius: 10px;  /* Arrondi des coins */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            cursor: pointer;  /* Curseur en forme de main */
-        }
+    div.stButton > button:hover {
+        transform: scale(1.03);
+        border-color: #aaa;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    }
     </style>
     """, unsafe_allow_html=True)
 
-   st.markdown("""
-<style>
-div.stButton > button {
-    width: 420px;
-    height: 230px;
-    display: block;
-    margin: 40px auto 20px auto;
-    border-radius: 24px;
-    border: 2px solid #ddd;
-    background-color: white;
-    font-size: 36px;
-    font-weight: 700;
-    color: #222;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    transition: all 0.2s ease-in-out;
-}
+    # --- Texte affiché ---
+    if st.session_state.show_translation:
+        card_text = st.session_state.current_word["french"]
+    else:
+        card_text = st.session_state.current_word["english"]
 
-div.stButton > button:hover {
-    transform: scale(1.03);
-    border-color: #aaa;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
-}
-</style>
-""", unsafe_allow_html=True)
+    # --- Carte cliquable ---
+    if st.button(card_text, key="flashcard"):
+        st.session_state.show_translation = not st.session_state.show_translation
 
-if "show_translation" not in st.session_state:
-    st.session_state.show_translation = False
-
-card_text = current_word["french"] if st.session_state.show_translation else current_word["english"]
-
-if st.button(card_text, key="flashcard_button"):
-    st.session_state.show_translation = not st.session_state.show_translation
-
+    # --- Mot suivant ---
+    st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
+    if st.button("Next word"):
+        st.session_state.current_word = random.choice(st.session_state.words)
+        st.session_state.show_translation = False
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
 # QUIZ
